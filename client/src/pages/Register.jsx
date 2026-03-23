@@ -178,6 +178,7 @@ const formContainerStyle = {
   background: "white",
   padding: "2rem",
   borderRadius: "8px",
+  
 };
 
 
