@@ -38,11 +38,15 @@ export const registerUser = async (req, res) => {
     // 5. Remove password from response
     user.password = undefined;
 
+    const userDTO = userToDTO(user);
     // 6. Send success response
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      data: user
+      data: {
+        token,
+        user: userDTO
+      }
     });
 
   } catch (error) {
