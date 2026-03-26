@@ -1,23 +1,23 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../services/api"; // ✅ axios instance
 
 const Login = () => {
-  // Form state
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  // UI state
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
-  // Handle input change
+  // 🔁 Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -27,7 +27,7 @@ const Login = () => {
     }));
   };
 
-  // Handle form submit
+  // 🚀 Handle submit using axios
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -35,31 +35,27 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          password: formData.password,
-        }),
+      const response = await api.post("/api/auth/login", {
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
-        // Save using context
-        login(data.user, data.token);
+      // ✅ Save to context
+      login(data.user, data.token);
 
-        // Redirect to dashboard
-        navigate("/dashboard");
-      } else {
-        setError(data.message || "Login failed");
-      }
+      // 🔁 Redirect to intended page or dashboard
+      const from = location.state?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
+
     } catch (err) {
       console.error(err);
-      setError("Unable to connect to server");
+
+      // Axios error handling
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -71,10 +67,10 @@ const Login = () => {
         <h1 style={titleStyle}>Welcome Back</h1>
         <p style={subtitleStyle}>Login to your account</p>
 
-        {/* Error message */}
+        {/* ❌ Error */}
         {error && <p style={errorStyle}>{error}</p>}
 
-        {/* Login Form */}
+        {/* 📝 Form */}
         <form onSubmit={handleSubmit} style={formStyle}>
           <input
             type="email"
@@ -96,16 +92,12 @@ const Login = () => {
             style={inputStyle}
           />
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={buttonStyle}
-          >
+          <button type="submit" disabled={loading} style={buttonStyle}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* Register link */}
+        {/* 🔗 Register */}
         <p style={linkTextStyle}>
           Don't have an account?{" "}
           <Link to="/register" style={linkStyle}>
@@ -184,4 +176,5 @@ const linkStyle = {
 };
 
 export default Login;
+
 
