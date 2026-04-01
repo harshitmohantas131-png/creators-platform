@@ -5,6 +5,7 @@ import connectDB from './config/database.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from "./routes/postRoutes.js";
+import errorHandler from './middlewares/errorMiddleware.js';
 // Load environment variables
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use("/api/posts", postRoutes);
+app.use(errorHandler);
 
 // Health check endpoint (keep this for testing)
 app.get('/api/health', (req, res) => {

@@ -4,8 +4,12 @@ import { useAuth } from "../../context/AuthContext";
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  // 🔥 IMPORTANT: handle loading properly
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
+  // If logged in → redirect
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
