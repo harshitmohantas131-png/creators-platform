@@ -1,6 +1,8 @@
 
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import socket from "../services/socket";
 
 const Dashboard = () => {
   const { user, logout, loading } = useAuth();
@@ -14,6 +16,31 @@ const Dashboard = () => {
   if (!user) {
     return <Navigate to="/login" />;
   }
+
+  useEffect(() => {
+    // 🔌 connect
+    socket.connect();
+
+    socket.on("connect", () => {
+      console.log("🔌 Connected:", socket.id);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("❌ Disconnected:", reason);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("Error:", err.message);
+    });
+
+    // 🧹 cleanup
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("connect_error");
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <div style={containerStyle}>
@@ -81,6 +108,8 @@ const logoutBtnStyle = {
   borderRadius: "5px",
   cursor: "pointer",
 };
+
+
 
 export default Dashboard;
 
