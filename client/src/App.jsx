@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import PublicRoute from "./components/common/PublicRoute";
 
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,8 +15,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        
-        {/* ✅ Wrap UI safely */}
+        {/* Main UI */}
         <div>
           <Header />
 
@@ -51,8 +51,8 @@ function App() {
           </Routes>
         </div>
 
-        {/* ✅ Toast always at root */}
-        <ToastContainer position="top-right" autoClose={3000} />
+        {/* 🔥 GLOBAL TOASTER (IMPORTANT) */}
+        <ToastContainer position="top-right" reverseOrder={false} />
 
       </AuthProvider>
     </BrowserRouter>

@@ -8,6 +8,8 @@ import postRoutes from "./routes/postRoutes.js";
 import errorHandler from './middlewares/errorMiddleware.js';
 import { createServer } from "http";
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+
 // Load environment variables
 dotenv.config();
 
@@ -23,9 +25,28 @@ const io = new Server(httpServer, {
     credentials: true
   },
 });
-io.on("connection", (socket) => {
-  console.log(`✅ User connected: ${socket.id}`);
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
 
+  if (!token) {
+    return next(new Error("Authentication error: No token"));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 🔥 attach user
+    socket.data.user = decoded;
+
+    next(); // allow connection
+  } catch (err) {
+    next(new Error("Authentication error: Invalid token"));
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log(`✅ User connected: ${socket.id} | User: ${socket.data.user.email}`);
+  
   socket.on("disconnect", (reason) => {
     console.log(`❌ User disconnected: ${socket.id} (${reason})`);
   });
@@ -44,7 +65,7 @@ app.use(express.json());
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
-app.use("/api/posts", postRoutes);
+app.use("/api/posts", postRoutes(io));
 app.use(errorHandler);
 
 // Health check endpoint (keep this for testing)

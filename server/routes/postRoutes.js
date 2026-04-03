@@ -1,13 +1,31 @@
 import express from "express";
 import { protect } from "../middlewares/auth.js";
-import { createPost, getPosts, getPostById, updatePost, deletePost } from "../controllers/postController.js";
+import {
+  createPost,
+  getPosts,
+  getPostById,
+  updatePost,
+  deletePost,
+} from "../controllers/postController.js";
 
-const router = express.Router();
+// 🔥 Wrap routes inside a function that receives io
+const postRoutes = (io) => {
+  const router = express.Router();
 
-router.post("/", protect, createPost);
-router.get("/", protect, getPosts);
-router.get("/:id", protect, getPostById);
-router.put("/:id", protect, updatePost);
-router.delete("/:id", protect, deletePost);
+  // CREATE POST (emit event after creation)
+  router.post("/", protect, (req, res) => createPost(req, res, io));
 
-export default router;
+  // READ
+  router.get("/", protect, getPosts);
+  router.get("/:id", protect, getPostById);
+
+  // UPDATE
+  router.put("/:id", protect, updatePost);
+
+  // DELETE
+  router.delete("/:id", protect, deletePost);
+
+  return router;
+};
+
+export default postRoutes;
