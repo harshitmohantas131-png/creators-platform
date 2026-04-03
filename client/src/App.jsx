@@ -7,7 +7,7 @@ import Register from "./pages/Register";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import PublicRoute from "./components/common/PublicRoute";
 
-
+// imported react-toastify for better notifications
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
