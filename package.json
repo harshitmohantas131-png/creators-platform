@@ -11,6 +11,8 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
+    "cloudinary": "^2.9.0",
+    "multer": "^2.1.1",
     "react-router-dom": "^7.13.1",
     "react-toastify": "^9.1.3"
   }

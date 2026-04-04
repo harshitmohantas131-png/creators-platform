@@ -1,17 +1,22 @@
 import express from 'express';
 import dotenv from 'dotenv';
+
 import cors from 'cors';
 import connectDB from './config/database.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from "./routes/postRoutes.js";
 import errorHandler from './middlewares/errorMiddleware.js';
+import uploadRoutes from "./routes/upload.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 
 // Load environment variables
 dotenv.config();
+console.log("CLOUD NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("API KEY:", process.env.CLOUDINARY_API_KEY);
+console.log("API SECRET:", process.env.CLOUDINARY_API_SECRET);
 
 // Connect to database
 connectDB();
@@ -67,6 +72,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use("/api/posts", postRoutes(io));
 app.use(errorHandler);
+app.use("/api/upload", uploadRoutes);
 
 // Health check endpoint (keep this for testing)
 app.get('/api/health', (req, res) => {
