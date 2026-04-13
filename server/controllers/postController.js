@@ -3,7 +3,7 @@ import Post from '../models/Post.js';
 // ================= CREATE POST =================
 export const createPost = async (req, res, io) => {
   try {
-    const { title, content, category, status } = req.body;
+    const { title, content, category, status, coverImage } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({
@@ -16,6 +16,7 @@ export const createPost = async (req, res, io) => {
       content,
       category,
       status,
+      coverImage: coverImage || null,
       author: req.user._id,
     });
 
