@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 // @desc    Login user
 // @route   POST /api/auth/login
 export const loginUser = async (req, res) => {
+ 
+
   try {
     const { email, password } = req.body;
 
@@ -14,6 +16,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Please provide email and password'
+    
       });
     }
 
@@ -27,8 +30,10 @@ export const loginUser = async (req, res) => {
       });
     }
 
+
     // 3. Compare password
     const isMatch = await bcrypt.compare(password, user.password);
+ 
 
     if (!isMatch) {
       return res.status(401).json({
