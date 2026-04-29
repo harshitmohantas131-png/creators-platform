@@ -1,25 +1,21 @@
-import express from 'express';
 import dotenv from 'dotenv';
-
-import cors from 'cors';
 import connectDB from './config/database.js';
-import userRoutes from './routes/userRoutes.js';
-import authRoutes from './routes/authRoutes.js';
-import postRoutes from "./routes/postRoutes.js";
-import errorHandler from './middlewares/errorMiddleware.js';
-import uploadRoutes from "./routes/upload.js";
+import app from './app.js';
+
 import { createServer } from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 
-// Load environment variables
+// Load env
 dotenv.config();
 
-// Connect to database
+// Connect DB
 connectDB();
 
-const app = express();
+// Create HTTP server
 const httpServer = createServer(app);
+
+// Socket.io setup
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -27,6 +23,8 @@ const io = new Server(httpServer, {
     credentials: true
   },
 });
+
+// Auth middleware for sockets
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
 
@@ -36,61 +34,28 @@ io.use((socket, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 🔥 attach user
     socket.data.user = decoded;
-
-    next(); // allow connection
+    next();
   } catch (err) {
     next(new Error("Authentication error: Invalid token"));
   }
 });
 
+// Connection
 io.on("connection", (socket) => {
-  console.log(`✅ User connected: ${socket.id} | User: ${socket.data.user.email}`);
-  
+  console.log(`✅ User connected: ${socket.id}`);
+
   socket.on("disconnect", (reason) => {
     console.log(`❌ User disconnected: ${socket.id} (${reason})`);
   });
 });
+
+// ⚠️ IMPORTANT: inject io into posts route
+import postRoutes from "./routes/postRoutes.js";
+app.use("/api/posts", postRoutes(io));
+
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  credentials: true,
-  optionsSuccessStatus: 200
-}));
-
-app.use(express.json());
-
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
-app.use("/api/posts", postRoutes(io));
-app.use("/api/upload", uploadRoutes);
-
-app.get('/', (req, res) => {
-  res.send("🔥 ROOT WORKING");
-});
-
-// Health check endpoint (keep this for testing)
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    message: 'Server is running!',
-    timestamp: new Date(),
-    database: 'Connected'
-  });
-});
-
-app.get('/api/health', (req, res) => {
-  console.log("🔥 HEALTH ROUTE HIT");
-  res.json({ message: 'Server is running!' });
-});
-
-app.use(errorHandler);
-
-// Start server
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🔌 Socket.io ready`);
