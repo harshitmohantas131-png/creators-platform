@@ -8,14 +8,26 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-     "test": "jest"
-  },"jest": {
+    "test": "jest"
+  },
+  "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.js"
+    ],
     "transform": {
       "^.+\\.(js|jsx)$": "babel-jest"
-    },"moduleFileExtensions": ["js", "jsx"],
-    "testMatch": ["**/?(*.)+(test).[jt]s?(x)"]
+    },
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "<rootDir>/src/__mocks__/styleMock.js"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "jsx"
+    ],
+    "testMatch": [
+      "**/?(*.)+(test).[jt]s?(x)"
+    ]
   },
   "dependencies": {
     "axios": "^1.13.6",
