@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import PublicRoute from "./components/common/PublicRoute";
+import CreatePost from "./pages/CreatePost";
 
 // imported react-toastify for better notifications
 import { ToastContainer } from "react-toastify";
@@ -47,6 +48,15 @@ function App() {
                   <Dashboard />
                 </ProtectedRoute>
               }
+            />
+
+            <Route
+               path="/create-post"
+               element={
+               <ProtectedRoute>
+               <CreatePost />
+               </ProtectedRoute>
+             }
             />
           </Routes>
         </div>
