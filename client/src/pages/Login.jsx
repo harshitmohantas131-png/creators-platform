@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import api from "../services/api"; // ✅ axios instance
+import api from "../services/api";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,14 +10,12 @@ const Login = () => {
     password: "",
   });
 
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
 
-  // 🔁 Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -27,11 +25,8 @@ const Login = () => {
     }));
   };
 
-  // 🚀 Handle submit using axios
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    setError("");
     setLoading(true);
 
     try {
@@ -42,19 +37,18 @@ const Login = () => {
 
       const data = response.data;
 
-      // ✅ Save to context
       login(data.user, data.token);
 
-      // 🔁 Redirect to intended page or dashboard
+      toast.success("Login successful 🎉");
+
       const from = location.state?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
 
     } catch (err) {
       console.error(err);
 
-      // Axios error handling
-      setError(
-        err.response?.data?.message || "Login failed. Please try again."
+      toast.error(
+        err?.response?.data?.message || "Login failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -67,10 +61,6 @@ const Login = () => {
         <h1 style={titleStyle}>Welcome Back</h1>
         <p style={subtitleStyle}>Login to your account</p>
 
-        {/* ❌ Error */}
-        {error && <p style={errorStyle}>{error}</p>}
-
-        {/* 📝 Form */}
         <form onSubmit={handleSubmit} style={formStyle}>
           <input
             type="email"
@@ -97,7 +87,7 @@ const Login = () => {
           </button>
         </form>
 
-        {/* 🔗 Register */}
+        {/* ✅ FIXED COMMENT */}
         <p style={linkTextStyle}>
           Don't have an account?{" "}
           <Link to="/register" style={linkStyle}>
@@ -109,72 +99,73 @@ const Login = () => {
   );
 };
 
-/* ---------------- STYLES ---------------- */
-
 const containerStyle = {
-  minHeight: "80vh",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
+  minHeight: "100vh",
   backgroundColor: "#f5f5f5",
 };
 
 const formContainerStyle = {
-  background: "white",
+  backgroundColor: "white",
   padding: "2rem",
   borderRadius: "8px",
-  width: "350px",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+  width: "100%",
+  maxWidth: "400px",
 };
 
 const titleStyle = {
-  textAlign: "center",
+  fontSize: "1.8rem",
+  fontWeight: "bold",
   marginBottom: "0.5rem",
+  color: "#333",
 };
 
 const subtitleStyle = {
-  textAlign: "center",
-  marginBottom: "1rem",
+  fontSize: "0.9rem",
   color: "#666",
+  marginBottom: "1.5rem",
 };
 
 const formStyle = {
   display: "flex",
   flexDirection: "column",
+  gap: "1rem",
+  marginBottom: "1.5rem",
 };
 
 const inputStyle = {
   padding: "0.75rem",
-  marginBottom: "1rem",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
+  fontSize: "1rem",
+  border: "1px solid #ddd",
+  borderRadius: "4px",
+  fontFamily: "inherit",
 };
 
 const buttonStyle = {
   padding: "0.75rem",
+  fontSize: "1rem",
+  fontWeight: "bold",
   backgroundColor: "#007bff",
   color: "white",
   border: "none",
-  borderRadius: "5px",
+  borderRadius: "4px",
   cursor: "pointer",
-};
-
-const errorStyle = {
-  color: "red",
-  textAlign: "center",
-  marginBottom: "1rem",
 };
 
 const linkTextStyle = {
   textAlign: "center",
-  marginTop: "1rem",
+  fontSize: "0.9rem",
+  color: "#666",
 };
 
 const linkStyle = {
   color: "#007bff",
   textDecoration: "none",
+  fontWeight: "bold",
 };
 
 export default Login;
-
 
