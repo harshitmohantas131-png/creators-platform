@@ -1,55 +1,39 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-// 🔹 User Schema
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Name is required"],
-      trim: true,
+      required: true,
     },
-
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
       lowercase: true,
-      trim: true,
-      index: true, // ✅ IMPORTANT 
     },
-
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: 6,
-      select: false, // 🔐 hide password by default
+      required: true,
+      select: false,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true },
 );
 
-
-// 🔹 Hash password before saving
+// 🔥 FIXED PRE-SAVE
 userSchema.pre("save", async function () {
-  // Only hash if password is modified
   if (!this.isModified("password")) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-
-// 🔹 Compare password method
+// Compare password
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-
-
-// 🔹 Export model
 const User = mongoose.model("User", userSchema);
-
 export default User;
