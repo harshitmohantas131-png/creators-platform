@@ -1,3 +1,4 @@
+
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -8,7 +9,7 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Check if fields exist
+    // 1. Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -45,10 +46,7 @@ export const loginUser = async (req, res) => {
       }
     );
 
-    // 5. Remove password
-    user.password = undefined;
-
-    // 6. Send response
+    // 5. Send response (clean user data)
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -69,3 +67,4 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+
