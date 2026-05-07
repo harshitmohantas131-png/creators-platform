@@ -14,9 +14,6 @@ import jwt from "jsonwebtoken";
 
 // Load environment variables
 dotenv.config();
-console.log("CLOUD NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-console.log("API KEY:", process.env.CLOUDINARY_API_KEY);
-console.log("API SECRET:", process.env.CLOUDINARY_API_SECRET);
 
 // Connect to database
 connectDB();
