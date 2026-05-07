@@ -40,3 +40,8 @@ JWT_SECRET=your_secret_key
 ## Notes
 - `.env` files are not included for security reasons
 - node_modules are excluded from submission
+
+# Deployed Links:
+
+Backend: https://creators-platform-api-4hym.onrender.com/
+Frontend: https://creators-platform-o8au1xl7w-harshits-projects-37653749.vercel.app/
