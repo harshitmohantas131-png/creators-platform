@@ -68,8 +68,11 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use("/api/posts", postRoutes(io));
-app.use(errorHandler);
 app.use("/api/upload", uploadRoutes);
+
+app.get('/', (req, res) => {
+  res.send("🔥 ROOT WORKING");
+});
 
 // Health check endpoint (keep this for testing)
 app.get('/api/health', (req, res) => {
@@ -79,6 +82,13 @@ app.get('/api/health', (req, res) => {
     database: 'Connected'
   });
 });
+
+app.get('/api/health', (req, res) => {
+  console.log("🔥 HEALTH ROUTE HIT");
+  res.json({ message: 'Server is running!' });
+});
+
+app.use(errorHandler);
 
 // Start server
 httpServer.listen(PORT, () => {

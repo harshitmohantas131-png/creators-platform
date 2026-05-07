@@ -59,6 +59,7 @@ export const registerUser = async (req, res) => {
       token,
       user: userToDTO(user)
     });
+    
 
   } catch (error) {
     res.status(500).json({
