@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/database.js';
 import userRoutes from './routes/userRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -24,6 +25,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check endpoint (keep this for testing)
 app.get('/api/health', (req, res) => {
@@ -33,6 +35,8 @@ app.get('/api/health', (req, res) => {
     database: 'Connected'
   });
 });
+
+
 
 // Start server
 app.listen(PORT, () => {
