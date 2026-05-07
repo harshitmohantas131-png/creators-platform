@@ -8,7 +8,7 @@ const Home = () => {
       <p>A platform for creators to share their work.</p>
 
       <ConnectionTest />
-
+``
       <div style={{ marginTop: "2rem" }}>
         <Link to="/register" style={{ marginRight: "1rem" }}>
           Get Started
