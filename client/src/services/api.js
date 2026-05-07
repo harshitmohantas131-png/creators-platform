@@ -1,19 +1,9 @@
 import axios from "axios";
 
-const getViteEnv = () => {
-  try {
-    return new Function("return import.meta")().env;
-  } catch {
-    return undefined;
-  }
-};
 
 const api = axios.create({
-  baseURL:
-    getViteEnv()?.VITE_API_URL ||
-    globalThis.process?.env?.VITE_API_URL ||
-    "http://localhost:5000",
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: 10000
 });
 
 // 🔐 REQUEST INTERCEPTOR (attach token)
