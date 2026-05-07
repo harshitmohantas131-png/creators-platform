@@ -1,10 +1,19 @@
-
 import axios from "axios";
 
+const getViteEnv = () => {
+  try {
+    return new Function("return import.meta")().env;
+  } catch {
+    return undefined;
+  }
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  baseURL:
+    getViteEnv()?.VITE_API_URL ||
+    globalThis.process?.env?.VITE_API_URL ||
+    "http://localhost:5000",
   timeout: 10000,
-  
 });
 
 // 🔐 REQUEST INTERCEPTOR (attach token)
@@ -18,7 +27,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // 🚨 RESPONSE INTERCEPTOR (handle 401)
@@ -33,8 +42,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;
-
