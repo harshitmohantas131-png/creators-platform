@@ -1,26 +1,19 @@
-
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import socket from "../services/socket";
+import toast from "react-hot-toast"; // 🔥 ADD THIS
 
 const Dashboard = () => {
   const { user, logout, loading } = useAuth();
 
-  // ⏳ Wait for auth check
-  if (loading) {
-    return <div style={{ textAlign: "center", padding: "2rem" }}>Loading...</div>;
-  }
-
-  // 🔐 Protect route
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
   useEffect(() => {
-    // 🔌 connect
+    if (loading || !user) return;
+
+    // 🔌 connect socket
     socket.connect();
 
+    // ✅ connection logs
     socket.on("connect", () => {
       console.log("🔌 Connected:", socket.id);
     });
@@ -30,17 +23,38 @@ const Dashboard = () => {
     });
 
     socket.on("connect_error", (err) => {
-      console.error("Error:", err.message);
+      console.error("Socket error:", err.message);
     });
 
-    // 🧹 cleanup
+    // 🔥 REAL-TIME EVENT LISTENER
+    socket.on("newPost", (data) => {
+      console.log("📢 New post event:", data);
+      toast.success(data.message);
+    });
+
+    // 🧹 CLEANUP (VERY IMPORTANT)
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("connect_error");
+      socket.off("newPost"); // 🔥 remove listener
       socket.disconnect();
     };
-  }, []);
+  }, [loading, user]);
+
+  // ⏳ Loading
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", padding: "2rem" }}>
+        Loading...
+      </div>
+    );
+  }
+
+  // 🔐 Protection
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <div style={containerStyle}>
@@ -55,7 +69,9 @@ const Dashboard = () => {
 
       <div style={boxStyle}>
         <h3>Your Info</h3>
-        <p><strong>Email:</strong> {user.email}</p>
+        <p>
+          <strong>Email:</strong> {user.email}
+        </p>
         <p>
           <strong>Joined:</strong>{" "}
           {new Date(user.createdAt).toLocaleDateString()}
@@ -109,7 +125,4 @@ const logoutBtnStyle = {
   cursor: "pointer",
 };
 
-
-
 export default Dashboard;
-

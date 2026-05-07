@@ -1,14 +1,14 @@
 import Post from '../models/Post.js';
 
 // ================= CREATE POST =================
-export const createPost = async (req, res, next) => {
+export const createPost = async (req, res, io) => {
   try {
     const { title, content, category, status } = req.body;
 
     if (!title || !content) {
-      const error = new Error("Title and content are required");
-      error.statusCode = 400;
-      return next(error);
+      return res.status(400).json({
+        message: "Title and content are required"
+      });
     }
 
     const post = await Post.create({
@@ -19,6 +19,14 @@ export const createPost = async (req, res, next) => {
       author: req.user._id,
     });
 
+    // Emit event
+    io.emit("newPost", {
+      message: `New post created by ${req.user.name}`, post: {
+        _id: post._id,
+        title: post.title,
+      },
+    });
+
     res.status(201).json({
       success: true,
       message: "Post created successfully",
@@ -26,8 +34,10 @@ export const createPost = async (req, res, next) => {
     });
 
   } catch (error) {
-    error.statusCode = 500;
-    next(error);
+    console.error(err);
+    res.status(500).json({
+      message: "Error creating post"
+    });
   }
 };
 
