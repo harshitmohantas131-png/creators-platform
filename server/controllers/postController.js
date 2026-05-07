@@ -1,11 +1,15 @@
 import Post from '../models/Post.js';
-// Create Post
+
+// ================= CREATE POST =================
 export const createPost = async (req, res) => {
   try {
     const { title, content, category, status } = req.body;
 
     if (!title || !content) {
-      return res.status(400).json({ message: "Title & content required" });
+      return res.status(400).json({
+        success: false,
+        message: "Title and content are required",
+      });
     }
 
     const post = await Post.create({
@@ -16,14 +20,23 @@ export const createPost = async (req, res) => {
       author: req.user._id,
     });
 
-    res.status(201).json({ success: true, data: post });
+    res.status(201).json({
+      success: true,
+      message: "Post created successfully",
+      data: post,
+    });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error creating post" });
+  } catch (error) {
+    console.error("Create Post Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating post",
+    });
   }
 };
-// Get Posts (with pagination)
+
+
+// ================= GET POSTS (PAGINATION) =================
 export const getPosts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -37,18 +50,142 @@ export const getPosts = async (req, res) => {
 
     const total = await Post.countDocuments({ author: req.user._id });
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: posts,
       pagination: {
         page,
+        limit,
+        total,
         totalPages: Math.ceil(total / limit),
+        hasNextPage: page < Math.ceil(total / limit),
+        hasPrevPage: page > 1,
       },
     });
-   console.log("REQ.BODY:", req.body);
-   console.log("REQ.USER:", req.user);
 
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching posts" });
+  } catch (error) {
+    console.error("Get Posts Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching posts",
+    });
+  }
+};
+
+
+// ================= GET SINGLE POST =================
+export const getPostById = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // 🔐 Ownership check
+    if (post.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to view this post",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: post,
+    });
+
+  } catch (error) {
+    console.error("Get Single Post Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching post",
+    });
+  }
+};
+
+
+// ================= UPDATE POST =================
+export const updatePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // 🔐 Ownership check
+    if (post.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this post",
+      });
+    }
+
+    const { title, content, category, status } = req.body;
+
+    if (title) post.title = title;
+    if (content) post.content = content;
+    if (category) post.category = category;
+    if (status) post.status = status;
+
+    const updatedPost = await post.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Post updated successfully",
+      data: updatedPost,
+    });
+
+  } catch (error) {
+    console.error("Update Post Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating post",
+    });
+  }
+};
+
+
+// ================= DELETE POST =================
+export const deletePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // 🔐 Ownership check
+    if (post.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this post",
+      });
+    }
+
+    await post.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Post deleted successfully",
+      data: { id: req.params.id },
+    });
+
+  } catch (error) {
+    console.error("Delete Post Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting post",
+    });
   }
 };
