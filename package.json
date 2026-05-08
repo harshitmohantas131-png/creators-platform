@@ -5,12 +5,16 @@
     "client": "npm run dev --prefix client",
     "server": "npm run dev --prefix server",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "test": "npm test --prefix server",
     "install-all": "npm install && npm install --prefix client && npm install --prefix server"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "react-router-dom": "^7.13.1"
+    "cloudinary": "^2.9.0",
+    "multer": "^2.1.1",
+    "react-router-dom": "^7.13.1",
+    "react-toastify": "^9.1.3"
   }
 }
