@@ -15,6 +15,12 @@ connectDB();
 // Create HTTP server
 const httpServer = createServer(app);
 
+// Middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
 // Socket.io setup
 const io = new Server(httpServer, {
   cors: {
