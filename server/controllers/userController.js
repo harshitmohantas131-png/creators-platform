@@ -1,5 +1,15 @@
+
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+// Helper: convert user → DTO
+const userToDTO = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  createdAt: user.createdAt
+});
 
 // @desc    Register a new user
 // @route   POST /api/users/register
@@ -8,42 +18,48 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // 1. Validate all required fields are provided
+    // 1. Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields: name, email, and password'
+        message: 'Please provide all required fields'
       });
     }
 
-    // 2. Check if user already exists
+    // 2. Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'User with this email already exists'
+        message: 'User already exists'
       });
     }
 
-    // 3. Hash the password for security
+    // 3. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Create new user with hashed password
+    // 4. Create user
     const user = await User.create({
       name,
       email,
       password: hashedPassword
     });
 
-    // 5. Remove password from response
-    user.password = undefined;
+    // 5. Generate JWT
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    );
 
-    // 6. Send success response
+    // 6. Send response
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      data: user
+      token,
+      user: userToDTO(user)
     });
+    
 
   } catch (error) {
     res.status(500).json({
@@ -54,18 +70,18 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
 // @desc    Get all users
 // @route   GET /api/users
-// @access  Public (will be protected later with auth)
+// @access  Private
 export const getAllUsers = async (req, res) => {
   try {
-    // Fetch all users, excluding password field
     const users = await User.find().select('-password');
-    
+
     res.status(200).json({
       success: true,
       count: users.length,
-      data: users
+      data: users.map(userToDTO)
     });
 
   } catch (error) {
@@ -77,17 +93,14 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// @desc    Get single user by ID
+
+// @desc    Get user by ID
 // @route   GET /api/users/:id
-// @access  Public (will be protected later)
+// @access  Private
 export const getUserById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const user = await User.findById(req.params.id).select('-password');
 
-    // Find user by ID, excluding password
-    const user = await User.findById(id).select('-password');
-
-    // Check if user exists
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -97,7 +110,7 @@ export const getUserById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: user
+      data: userToDTO(user)
     });
 
   } catch (error) {
@@ -109,15 +122,22 @@ export const getUserById = async (req, res) => {
   }
 };
 
+
 // @desc    Update user
 // @route   PUT /api/users/:id
-// @access  Private (will add auth later)
+// @access  Private
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email } = req.body;
 
-    // Find user
+    // 🔐 Only allow self-update
+    if (req.user.id !== id) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only update your own account'
+      });
+    }
+
     const user = await User.findById(id);
 
     if (!user) {
@@ -127,20 +147,17 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    // Update fields if provided
+    const { name, email } = req.body;
+
     if (name) user.name = name;
     if (email) user.email = email;
 
-    // Save updated user
     await user.save();
-
-    // Remove password from response
-    user.password = undefined;
 
     res.status(200).json({
       success: true,
-      message: 'User updated successfully',
-      data: user
+      message: 'User updated',
+      data: userToDTO(user)
     });
 
   } catch (error) {
@@ -152,14 +169,22 @@ export const updateUser = async (req, res) => {
   }
 };
 
+
 // @desc    Delete user
 // @route   DELETE /api/users/:id
-// @access  Private (will add auth later)
+// @access  Private
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find and delete user
+    // 🔐 Only allow self-delete
+    if (req.user.id !== id) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete your own account'
+      });
+    }
+
     const user = await User.findByIdAndDelete(id);
 
     if (!user) {
@@ -182,3 +207,4 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+

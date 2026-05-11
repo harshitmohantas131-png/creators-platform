@@ -1,26 +1,70 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import { AuthProvider } from "./context/AuthContext";
 import Header from "./components/layout/Header";
-import Footer from "./components/layout/Footer";
-
-import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import PublicRoute from "./components/common/PublicRoute";
+import CreatePost from "./pages/CreatePost";
+
+// imported react-toastify for better notifications
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <BrowserRouter>
-      <Header />
+      <AuthProvider>
+        {/* Main UI */}
+        <div>
+          <Header />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
+          <Routes>
+            <Route path="/" element={<h1>Home</h1>} />
 
-      <Footer />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+               path="/create-post"
+               element={
+               <ProtectedRoute>
+               <CreatePost />
+               </ProtectedRoute>
+             }
+            />
+          </Routes>
+        </div>
+
+        {/* 🔥 GLOBAL TOASTER (IMPORTANT) */}
+        <ToastContainer position="top-right" reverseOrder={false} />
+
+      </AuthProvider>
     </BrowserRouter>
   );
 }
