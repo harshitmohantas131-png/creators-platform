@@ -56,6 +56,15 @@ io.on("connection", (socket) => {
   });
 });
 
+// Export app for testing
+export default app;
+
+// Start server only if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
 // ⚠️ IMPORTANT: inject io into posts route
 import postRoutes from "./routes/postRoutes.js";
 app.use("/api/posts", postRoutes(io));
